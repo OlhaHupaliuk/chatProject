@@ -217,6 +217,36 @@ app.post("/chats", async (req, res) => {
   }
 });
 
+app.put("/chats/:id", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
+
+    const { firstName, lastName } = req.body;
+    if (!firstName || !lastName) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    const updatedChat = await Chat.findOneAndUpdate(
+      { _id: req.params.id, userId },
+      { firstName, lastName },
+      { new: true }
+    );
+
+    if (!updatedChat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    res.json(updatedChat);
+  } catch (err) {
+    console.error("Error updating chat:", err);
+    res.status(500).json({ message: "Failed to update chat" });
+  }
+});
+
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);

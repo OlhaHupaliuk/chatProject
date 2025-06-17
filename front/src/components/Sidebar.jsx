@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import '../styles/Sidebar.css'
+import useChatStore from '../store/chatStore'
 import ChatList from './ChatList'
 const Sidebar = () => {
   const navigate = useNavigate();
+  const { logout } = useChatStore();
   const token = localStorage.getItem('token');
   return (
     <div className='col-5 sidebar'>
@@ -11,7 +13,7 @@ const Sidebar = () => {
             <img className='sidebar__avatar avatar' src="src/assets/user-icon.svg" alt="user" />
             {token ? (
                 <button className='sidebar__logout-button' 
-                  onClick={()=>{navigate('/auth'), localStorage.removeItem('token')} }>
+                  onClick={()=>{logout(), navigate('/auth') }}>
                   Log out
                 </button>
               ) : (

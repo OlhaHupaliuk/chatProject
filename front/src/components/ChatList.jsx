@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react'
 import useChatStore from '../store/chatStore'
 import ChatItem from './ChatItem'
-
+import Modal from './Modal'
 const ChatList = () => {
-  const { chats, setChats } = useChatStore()
-  const token = localStorage.getItem('token')
+  const { chats, setChats, isAuthenticated, token } = useChatStore()
   const [showModal, setShowModal] = useState(false)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
 
   useEffect(() => {
-    if (token) {
+    if (isAuthenticated) {
       fetch('http://localhost:5000/chats', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -23,7 +22,7 @@ const ChatList = () => {
         .then((data) => setChats(data))
         .catch((error) => console.error('Error fetching chats:', error));
     }
-  }, [token, setChats]);
+  }, [token, isAuthenticated]);
 
   const handleAddChat = async () => {
     if (!firstName.trim() || !lastName.trim()) {
@@ -42,7 +41,7 @@ const ChatList = () => {
 
       if (!res.ok) throw new Error('Failed to create chat')
       const newChat = await res.json()
-      setChats([...chats, newChat])
+      setChats((prevChats) => [...prevChats, newChat]);
       setFirstName('')
       setLastName('')
       setShowModal(false)
@@ -65,29 +64,15 @@ const ChatList = () => {
       ))}
 
       {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal-content p-4 bg-white rounded shadow">
-            <h5>New Chat</h5>
-            <input
-              className="form-control my-2"
-              type="text"
-              placeholder="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            <input
-              className="form-control my-2"
-              type="text"
-              placeholder="Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            <div className="d-flex justify-content-end gap-2 mt-3">
-              <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleAddChat}>Create</button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          title="New Chat"
+          firstName={firstName}
+          lastName={lastName}
+          setFirstName={setFirstName}
+          setLastName={setLastName}
+          onSubmit={handleAddChat}
+          onClose={() => setShowModal(false)}
+        />
       )}
     </div>
   )

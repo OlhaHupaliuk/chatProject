@@ -2,10 +2,10 @@ import ChatHeader from './ChatHeader'
 import Chat from './Chat'
 import useChatStore from '../store/chatStore';
 const ChatArea = () => {
-    const { selectedChat, setChats } = useChatStore();
+    const { selectedChat } = useChatStore();
   return (
     <div className="chat-area col-7">
-      <ChatHeader chat={selectedChat} />
+      {selectedChat && <ChatHeader chat={selectedChat} />}
       <Chat />
     </div>
   );
