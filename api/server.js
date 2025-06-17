@@ -118,41 +118,7 @@ app.get("/chats", async (req, res) => {
     const userId = decoded.userId;
 
     let chats = await Chat.find({ userId });
-    if (chats.length === 0) {
-      chats = await Chat.insertMany([
-        {
-          userId,
-          firstName: "John",
-          lastName: "Doe",
-          messages: [
-            { sender: "user", text: "Hi John!", timestamp: new Date() },
-            { sender: "John", text: "Hey there!", timestamp: new Date() },
-          ],
-        },
-        {
-          userId,
-          firstName: "Jane",
-          lastName: "Smith",
-          messages: [
-            { sender: "user", text: "Hello Jane!", timestamp: new Date() },
-            {
-              sender: "Jane",
-              text: "Hi! How can I help you?",
-              timestamp: new Date(),
-            },
-          ],
-        },
-        {
-          userId,
-          firstName: "Alice",
-          lastName: "Johnson",
-          messages: [
-            { sender: "user", text: "I'll be late :(", timestamp: new Date() },
-            { sender: "Alice", text: "Where are you?", timestamp: new Date() },
-          ],
-        },
-      ]);
-    }
+
     res.json(chats);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch chats" });
@@ -226,7 +192,31 @@ app.post("/chats/:id/message", async (req, res) => {
   }
 });
 
-// Start server
+app.post("/chats", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
+
+    const { firstName, lastName } = req.body;
+    if (!firstName || !lastName)
+      return res.status(400).json({ message: "Missing fields" });
+
+    const newChat = await Chat.create({
+      userId,
+      firstName,
+      lastName,
+      messages: [],
+    });
+
+    res.status(201).json(newChat);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create chat" });
+  }
+});
+
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);

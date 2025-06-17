@@ -5,7 +5,7 @@ const ChatHeader = ({chat}) => {
     return <div></div>;
   }
   return (
-    <div className='chat__header'>
+     (<div className='chat__header'>
       <div className='chatHeader__photoName'>
         <img className='.chat-header__user avatar' 
         src="src/assets/woman-icon.svg" alt="" />
@@ -15,7 +15,7 @@ const ChatHeader = ({chat}) => {
         <img src="src/assets/settings-icon.svg" 
         height={24} alt=""/>
         </button>
-  </div>
+  </div>) 
   )
 }
 
